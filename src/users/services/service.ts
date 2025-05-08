@@ -1,6 +1,7 @@
 import { IUserRepository } from '../repositories/IUserRepository';
 import { BadRequestError, NotFoundError } from '../../tools/errors';
 import { UserToBeRegistered, UserToBeUpdated } from './User.type';
+import { UserEntity } from './User.entity';
 
 export class UserService {
   constructor(
@@ -16,7 +17,8 @@ export class UserService {
     if (userWithSameNickname) {
       throw new BadRequestError('username already used')
     }
-    return this.userRepository.register(user);
+    const UserToBeRegistered = await UserEntity.createWithPassword(user)
+    return this.userRepository.register(UserToBeRegistered);
   }
 
   async update(user: UserToBeUpdated) {
@@ -28,7 +30,8 @@ export class UserService {
     if (userWithSameNickname && userWithSameNickname.id !== user.id) {
       throw new BadRequestError('username already used')
     }
-    return this.userRepository.update(user);
+    const UserToBeRegistered = await UserEntity.createWithPassword(user)
+    return this.userRepository.update(UserToBeRegistered);
   }
 
   async delete(id: string) {

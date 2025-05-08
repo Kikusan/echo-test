@@ -34,6 +34,7 @@ export class TypeOrmUserRepository implements IUserRepository {
   }
 
   private mapTypeORMToUserDomain(user: User): ReadUser {
-    return { ...user, role: user.role.name }
+    const { id, nickname, name, address, comment, role } = user;
+    return { id, nickname, address, name, comment, role: role.name }
   }
 }
