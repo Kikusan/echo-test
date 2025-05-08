@@ -44,6 +44,7 @@ npm i
 docker compose up 
 ```
 ou docker-compose up selon la version de docker compose
+le swagger sera accessible sur [http://localhost:4000/api](http://localhost:4000/api)
 
 ### 4. désinstaller le projet
 
@@ -51,5 +52,8 @@ ou docker-compose up selon la version de docker compose
 docker compose down --volumes
 ```
 ou docker-compose down --volumes selon la version de docker compose
+Vous pouvez supprimer le dossier par la suite.
 
-vous pouvez supprimer le dossier par la suite.
+## Journal de bord
+
+Vous pouvez voir l'évolution de ma réfléxion [ici](diary.md)
