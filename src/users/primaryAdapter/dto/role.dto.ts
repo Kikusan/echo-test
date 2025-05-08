@@ -15,5 +15,5 @@ export class RoleDto {
     description: 'Name of the role',
     required: false
   })
-  readonly name?: string;
+  readonly name: string;
 }

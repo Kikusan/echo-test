@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Put } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ReadUserDTO } from './dto/readUser.dto';
 import { UserService } from '../services/service';
@@ -16,12 +16,6 @@ export class UserController {
     return user;
   }
 
-  @Get(':id')
-  async getById(@Param('id') id: string): Promise<UserDTO> {
-    const user = await this.userService.getId(id);
-    return user;
-  }
-
   @Post()
   async register(@Body() newUser: UserDTO): Promise<ReadUserDTO> {
     const userTobeRegistered = {
@@ -32,14 +26,14 @@ export class UserController {
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() userToBeUpdated: UserDTO): Promise<ReadUserDTO> {
+  async update(@Param('id', new ParseUUIDPipe()) id: string, @Body() userToBeUpdated: UserDTO): Promise<ReadUserDTO> {
     const updatedUser = await this.userService.update({ ...userToBeUpdated, id });
     return updatedUser;
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async delete(@Param('id') id: string): Promise<void> {
+  async delete(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
     await this.userService.delete(id);
   }
 

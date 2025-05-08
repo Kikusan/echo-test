@@ -16,6 +16,7 @@ export class EchoUser1746631036547 implements MigrationInterface {
                 "id" uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
                 "nickname" VARCHAR(255)  UNIQUE NOT NULL,
                 "name" VARCHAR(255),
+                "password" TEXT NOT NULL,
                 "comment" TEXT,
                 "address" TEXT,
                 "created_at" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,

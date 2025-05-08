@@ -1,5 +1,6 @@
 import { IUserRepository } from '../repositories/IUserRepository';
-import { NotFoundError } from '../../tools/errors';
+import { BadRequestError, NotFoundError } from '../../tools/errors';
+import { UserToBeRegistered, UserToBeUpdated } from './User.type';
 
 export class UserService {
   constructor(
@@ -10,23 +11,31 @@ export class UserService {
     return this.userRepository.get();
   }
 
-  async getId(id: string) {
-    const user = await this.userRepository.getById(id);
-    if (!user) {
-      throw new NotFoundError(`User with id ${id} not found`)
+  async register(user: UserToBeRegistered) {
+    const userWithSameNickname = await this.userRepository.getByNickname(user.nickname)
+    if (userWithSameNickname) {
+      throw new BadRequestError('username already used')
     }
-    return user;
+    return this.userRepository.register(user);
   }
 
-  async register(recruit: any) {
-    return this.userRepository.register(recruit);
-  }
-
-  update(user: any) {
+  async update(user: UserToBeUpdated) {
+    const userTobeDeleted = await this.userRepository.getById(user.id)
+    if (!userTobeDeleted) {
+      throw new NotFoundError('user not found')
+    }
+    const userWithSameNickname = await this.userRepository.getByNickname(user.nickname)
+    if (userWithSameNickname && userWithSameNickname.id !== user.id) {
+      throw new BadRequestError('username already used')
+    }
     return this.userRepository.update(user);
   }
 
   async delete(id: string) {
+    const userTobeDeleted = await this.userRepository.getById(id)
+    if (!userTobeDeleted) {
+      throw new NotFoundError('user not found')
+    }
     await this.userRepository.delete(id)
   }
 }

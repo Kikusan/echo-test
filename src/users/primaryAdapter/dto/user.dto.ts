@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { RoleDto } from './role.dto';
 
 export class UserDTO {
@@ -13,25 +13,39 @@ export class UserDTO {
   readonly nickname: string;
 
   @ApiProperty({
-    example: 'Robert',
-    description: 'name of the user'
+    example: 'itIsASecret',
+    description: 'Password of the user'
   })
+  @IsNotEmpty()
   @IsString()
-  readonly name: string;
+  readonly password: string;
+
+  @ApiProperty({
+    example: 'Robert',
+    description: 'name of the user',
+    required: false
+  })
+  @IsOptional()
+  @IsString()
+  readonly name?: string;
 
   @ApiProperty({
     example: 'the one with the popol nickname',
-    description: 'some comment about the user'
+    description: 'some comment about the user',
+    required: false
   })
+  @IsOptional()
   @IsString()
-  readonly comment: string;
+  readonly comment?: string;
 
   @ApiProperty({
     example: 'Robert',
-    description: 'adress of the user'
+    description: 'adress of the user',
+    required: false
   })
+  @IsOptional()
   @IsString()
-  readonly address: string;
+  readonly address?: string;
 
   @ApiProperty({
     description: 'User role',
