@@ -57,3 +57,7 @@ Vous pouvez supprimer le dossier par la suite.
 ## Journal de bord
 
 Vous pouvez voir l'évolution de ma réfléxion [ici](diary.md)
+
+## TODO
+
+Les choses que je pourrais faire pour améliorer la code base[ici](TODO.md)
