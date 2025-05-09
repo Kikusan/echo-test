@@ -1,7 +1,7 @@
-import { ReadUser, UserToBeRegistered, UserToBeUpdated } from "../services/User.type";
+import { ReadUser, Search, UserToBeRegistered, UserToBeUpdated, Page } from "../services/types";
 
 export interface IUserRepository {
-  get(): Promise<ReadUser[]>;
+  get(search: Search): Promise<Page>;
   getById(id: string): Promise<ReadUser | null>;
   getByNickname(nickname: string): Promise<ReadUser | null>
   register(user: UserToBeRegistered): Promise<ReadUser>;

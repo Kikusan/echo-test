@@ -1,8 +1,7 @@
 import * as bcrypt from 'bcryptjs';
-import { Role, UserToBeRegistered } from './User.type';
+import { Role, UserToBeRegistered } from './types';
 
 export class UserEntity {
-    id: string;
     nickname: string;
     password: string;
     name?: string;

@@ -3,7 +3,9 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  JoinColumn
+  JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn
 } from 'typeorm';
 import { Role } from './role.entity';
 
@@ -26,6 +28,12 @@ export class User {
 
   @Column({ type: 'text', nullable: true })
   address?: string;
+
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz', nullable: true })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz', nullable: true })
+  updatedAt: Date;
 
   @ManyToOne(() => Role, { nullable: false, eager: true })
   @JoinColumn({ name: 'roleId' })

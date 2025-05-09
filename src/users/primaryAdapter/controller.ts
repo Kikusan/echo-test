@@ -3,6 +3,7 @@ import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ReadUserDTO } from './dto/readUser.dto';
 import { UserService } from '../services/service';
 import { UserDTO } from './dto/user.dto';
+import { Page } from '../services/types';
 
 @Controller('users')
 @ApiTags('users')
@@ -11,26 +12,43 @@ export class UserController {
 
   @ApiResponse({
     status: 200,
-    description: 'user list',
+    description: 'Paged list of users',
     schema: {
-      type: 'array',
-      items: {
-        example: {
-          id: '123e4567-e89b-12d3-a456-426614174000',
-          nickname: 'johndoe',
-          name: 'John Doe',
-          comment: 'Un commentaire',
-          address: '123 rue principale',
-          role: 'admin',
+      type: 'object',
+      properties: {
+        users: {
+          type: 'array',
+          items: {
+            example: {
+              id: '123e4567-e89b-12d3-a456-426614174000',
+              nickname: 'johndoe',
+              name: 'John Doe',
+              comment: 'Un commentaire',
+              address: '123 rue principale',
+              role: 'admin',
+            },
+          },
+        },
+        totalPages: {
+          type: 'number',
+          example: 5,
+        },
+        totalResult: {
+          type: 'number',
+          example: 100,
         },
       },
     },
   })
   @Get()
-  async get(): Promise<any[]> {
-    const user = await this.userService.get();
-
-    return user;
+  async get(): Promise<Page> {
+    try {
+      const user = await this.userService.get();
+      return user;
+    } catch (e) {
+      console.log(e)
+      throw (e)
+    }
   }
 
   @ApiResponse({
@@ -72,8 +90,14 @@ export class UserController {
   })
   @Put(':id')
   async update(@Param('id', new ParseUUIDPipe()) id: string, @Body() userToBeUpdated: UserDTO): Promise<ReadUserDTO> {
-    const updatedUser = await this.userService.update({ ...userToBeUpdated, id });
-    return updatedUser;
+    try {
+      const updatedUser = await this.userService.update({ ...userToBeUpdated, id });
+      return updatedUser;
+    } catch (e) {
+      console.log(e)
+      throw (e)
+    }
+
   }
 
   @Delete(':id')
