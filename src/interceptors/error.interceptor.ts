@@ -1,6 +1,6 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor, NotFoundException, BadRequestException, InternalServerErrorException, HttpException } from '@nestjs/common';
+import { CallHandler, ExecutionContext, Injectable, NestInterceptor, NotFoundException, BadRequestException, InternalServerErrorException, HttpException, ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { Observable, catchError } from 'rxjs';
-import { NotFoundError, BadRequestError } from '../tools/errors';
+import { NotFoundError, BadRequestError, ForbiddenError, UnauthorizedError } from '../tools/errors';
 @Injectable()
 export class ErrorInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
@@ -9,6 +9,14 @@ export class ErrorInterceptor implements NestInterceptor {
 
         if (err instanceof HttpException) {
           throw err;
+        }
+
+        if (err instanceof ForbiddenError) {
+          throw new ForbiddenException(err.message || 'ressource not found');
+        }
+
+        if (err instanceof UnauthorizedError) {
+          throw new UnauthorizedException(err.message || 'ressource not found');
         }
 
         if (err instanceof NotFoundError) {

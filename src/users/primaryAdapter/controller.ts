@@ -3,8 +3,12 @@ import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ReadUserDTO } from './dto/readUser.dto';
 import { UserService } from '../services/service';
 import { UserDTO } from './dto/user.dto';
-import { Page } from '../services/types';
+import { Page, Requester } from '../services/types';
 
+const requester: Requester = {
+  id: 'b4f1ff12-e99b-442b-867c-367c14f0a713',
+  nickname: 'john doe'
+}
 @Controller('users')
 @ApiTags('users')
 export class UserController {
@@ -43,7 +47,7 @@ export class UserController {
   @Get()
   async get(): Promise<Page> {
     try {
-      const user = await this.userService.get();
+      const user = await this.userService.get(requester);
       return user;
     } catch (e) {
       console.log(e)
@@ -91,7 +95,7 @@ export class UserController {
   @Put(':id')
   async update(@Param('id', new ParseUUIDPipe()) id: string, @Body() userToBeUpdated: UserDTO): Promise<ReadUserDTO> {
     try {
-      const updatedUser = await this.userService.update({ ...userToBeUpdated, id });
+      const updatedUser = await this.userService.update(requester, { ...userToBeUpdated, id });
       return updatedUser;
     } catch (e) {
       console.log(e)
@@ -103,7 +107,7 @@ export class UserController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
-    await this.userService.delete(id);
+    await this.userService.delete(requester, id);
   }
 
 }

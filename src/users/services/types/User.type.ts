@@ -31,3 +31,8 @@ export type Role = {
     id: string,
     name: string
 }
+
+export type Requester = {
+    id: string,
+    nickname: string,
+}

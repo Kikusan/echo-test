@@ -1,4 +1,11 @@
 module.exports = {
+  collectCoverage: true,
+  collectCoverageFrom: [
+    'src/**/*.ts',
+    '!src/main.ts',
+    '!src/migrations/**',
+    '!**/*.spec.ts',
+  ],
   preset: 'ts-jest',
   testEnvironment: 'node',
   transform: {
