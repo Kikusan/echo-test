@@ -11,8 +11,8 @@ import { AuthController } from './controller';
         forwardRef(() => UserModule),
         PassportModule,
         JwtModule.register({
-            secret: 'secret_temp_key',
-            signOptions: { expiresIn: '1h' },
+            secret: process.env.SECRET_KEY ?? 'secret_temp_key',
+            signOptions: { expiresIn: process.env.JWT_EXPIRATION ?? '1h' },
         }),
     ],
     providers: [AuthService, JwtStrategy],

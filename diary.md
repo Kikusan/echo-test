@@ -37,3 +37,4 @@ Le but était dans un premier temps de permettre l'authentification et la récup
 Ce faisant, je me suis aperçu d'un leger problème: les rôles devrait avoir un attribut action qui serait un tableau de droit possible (tel que la lecture de la liste des utilisateurs, la suppression ou la modification meme si ce dernier tout le monde à le droit à partir du moment où un en identifié)
 
 cet étape me permet de supprimer le user mis aribitrairement à l'étape précédente.
+Pour des raisons pratiques, la route pour récupérer son token est dans le swagger. Dans la vraie vie, il ne sera pas présent
