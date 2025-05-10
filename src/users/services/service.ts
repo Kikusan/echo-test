@@ -1,6 +1,6 @@
 import { IUserRepository } from '../repositories/IUserRepository';
 import { BadRequestError, ForbiddenError, NotFoundError, UnauthorizedError } from '../../tools/errors';
-import { UserToBeRegistered, UserToBeUpdated, Search, Requester, ReadUser } from './types';
+import { UserToBeRegistered, UserToBeUpdated, Search, Requester, ReadUser, UserWithPass } from './types';
 import { UserEntity } from './User.entity';
 import { Page } from './types/Search.type';
 
@@ -23,7 +23,13 @@ export class UserService {
     return this.userRepository.get(search);
   }
 
-
+  async getByNickname(nickname: string): Promise<UserWithPass> {
+    const user = await this.userRepository.getByNickname(nickname)
+    if (!user) {
+      throw new NotFoundError('user not found')
+    }
+    return user;
+  }
 
   async register(user: UserToBeRegistered) {
     const userWithSameNickname = await this.userRepository.getByNickname(user.nickname)
@@ -71,7 +77,6 @@ export class UserService {
       return;
     }
     this.isAdmin(requesterWithRole);
-
   }
 
   private isAdmin(requesterWithRole: ReadUser) {

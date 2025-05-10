@@ -1,14 +1,14 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Put } from '@nestjs/common';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Put, Query, UseGuards, Request } from '@nestjs/common';
+import { ApiBearerAuth, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Request as ExpressRequest } from 'express';
 import { ReadUserDTO } from './dto/readUser.dto';
 import { UserService } from '../services/service';
 import { UserDTO } from './dto/user.dto';
 import { Page, Requester } from '../services/types';
-
-const requester: Requester = {
-  id: 'b4f1ff12-e99b-442b-867c-367c14f0a713',
-  nickname: 'john doe'
-}
+import { JwtAuthGuard } from '../../guard/jwt-auth.guard';
+import { RolesGuard } from '../../guard/roles.guard';
+import { SearchDto, SortOrder } from './dto/search.dto';
+import { Roles } from 'src/decorator/roles.decorator';
 @Controller('users')
 @ApiTags('users')
 export class UserController {
@@ -44,10 +44,28 @@ export class UserController {
       },
     },
   })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @ApiBearerAuth('jwt')
+  @ApiQuery({ name: 'page', type: Number, description: 'Le numéro de la page' })
+  @ApiQuery({ name: 'pageSize', type: Number, description: 'Le nombre d\'éléments par page' })
+  @ApiQuery({ name: 'sort', type: String, enum: Object.values(SortOrder), description: 'Ordre de tri des résultats', required: false })
+  @ApiQuery({ name: 'nickname', type: String, description: 'filter by nickname', required: false })
+  @ApiQuery({ name: 'role', type: String, description: 'filter by role', required: false })
   @Get()
-  async get(): Promise<Page> {
+  async get(@Request() req: ExpressRequest, @Query() searchDto: SearchDto): Promise<Page> {
+    const requester: Requester = req.user as Requester;
     try {
-      const user = await this.userService.get(requester);
+      const search = {
+        page: searchDto.page,
+        pageSize: searchDto.pageSize,
+        sort: searchDto.sort as SortOrder,
+        filter: {
+          nickname: searchDto.nickname,
+          role: searchDto.role
+        }
+      }
+      const user = await this.userService.get(requester, search);
       return user;
     } catch (e) {
       console.log(e)
@@ -93,7 +111,11 @@ export class UserController {
     },
   })
   @Put(':id')
-  async update(@Param('id', new ParseUUIDPipe()) id: string, @Body() userToBeUpdated: UserDTO): Promise<ReadUserDTO> {
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('user', 'admin')
+  @ApiBearerAuth('jwt')
+  async update(@Request() req: ExpressRequest, @Param('id', new ParseUUIDPipe()) id: string, @Body() userToBeUpdated: UserDTO): Promise<ReadUserDTO> {
+    const requester: Requester = req.user as Requester;
     try {
       const updatedUser = await this.userService.update(requester, { ...userToBeUpdated, id });
       return updatedUser;
@@ -105,8 +127,12 @@ export class UserController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @ApiBearerAuth('jwt')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async delete(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
+  async delete(@Request() req: ExpressRequest, @Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
+    const requester: Requester = req.user as Requester;
     await this.userService.delete(requester, id);
   }
 

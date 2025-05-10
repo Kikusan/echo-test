@@ -9,14 +9,29 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const config = new DocumentBuilder()
-    .setTitle('NestJS API')
-    .setDescription(`Documentation de l'API NestJS`)
+    .setTitle('Echo backend test API')
+    .setDescription(`Documentation de l'API du test backend`)
     .setVersion('1.0')
     .addTag('users')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'Authorization',
+        description: 'Entrez votre JWT ici (format: Bearer <token>)',
+        in: 'header',
+      },
+      'jwt',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api', app, document, {
+    swaggerOptions: {
+      cache: false,
+    },
+  });
 
 
   app.useGlobalPipes(new ValidationPipe({

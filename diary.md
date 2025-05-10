@@ -30,3 +30,10 @@ Pour le moment, un user est mis arbitrairement en paramètre mais par la suite c
 
 Ce qui devrait me permettre de me concentrer par la suite sur l'authentification sans avoir la nécessité de revenir dans la couche service ou repository.
 
+## Troisième temps
+
+Mise en place de l'authentification, étant donné que je m'appuie fortement sur nestJS, ce module utilise le système d'annotations.
+Le but était dans un premier temps de permettre l'authentification et la récupération des rôles afin de gérer les droits.
+Ce faisant, je me suis aperçu d'un leger problème: les rôles devrait avoir un attribut action qui serait un tableau de droit possible (tel que la lecture de la liste des utilisateurs, la suppression ou la modification meme si ce dernier tout le monde à le droit à partir du moment où un en identifié)
+
+cet étape me permet de supprimer le user mis aribitrairement à l'étape précédente.

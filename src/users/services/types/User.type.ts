@@ -27,6 +27,13 @@ export type ReadUser = {
     role: string
 }
 
+export type UserWithPass = {
+    id: string,
+    nickname: string,
+    password: string,
+    role: string
+}
+
 export type Role = {
     id: string,
     name: string
