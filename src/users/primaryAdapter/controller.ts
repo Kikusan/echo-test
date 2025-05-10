@@ -8,7 +8,7 @@ import { Page, Requester } from '../services/types';
 import { JwtAuthGuard } from '../../guard/jwt-auth.guard';
 import { RolesGuard } from '../../guard/roles.guard';
 import { SearchDto, SortOrder } from './dto/search.dto';
-import { Roles } from 'src/decorator/roles.decorator';
+import { Roles } from '../../decorator/roles.decorator';
 @Controller('users')
 @ApiTags('users')
 export class UserController {
@@ -55,22 +55,17 @@ export class UserController {
   @Get()
   async get(@Request() req: ExpressRequest, @Query() searchDto: SearchDto): Promise<Page> {
     const requester: Requester = req.user as Requester;
-    try {
-      const search = {
-        page: searchDto.page,
-        pageSize: searchDto.pageSize,
-        sort: searchDto.sort as SortOrder,
-        filter: {
-          nickname: searchDto.nickname,
-          role: searchDto.role
-        }
+    const search = {
+      page: searchDto.page,
+      pageSize: searchDto.pageSize,
+      sort: searchDto.sort as SortOrder,
+      filter: {
+        nickname: searchDto.nickname,
+        role: searchDto.role
       }
-      const user = await this.userService.get(requester, search);
-      return user;
-    } catch (e) {
-      console.log(e)
-      throw (e)
     }
+    const user = await this.userService.get(requester, search);
+    return user;
   }
 
   @ApiResponse({
@@ -116,13 +111,8 @@ export class UserController {
   @ApiBearerAuth('jwt')
   async update(@Request() req: ExpressRequest, @Param('id', new ParseUUIDPipe()) id: string, @Body() userToBeUpdated: UserDTO): Promise<ReadUserDTO> {
     const requester: Requester = req.user as Requester;
-    try {
-      const updatedUser = await this.userService.update(requester, { ...userToBeUpdated, id });
-      return updatedUser;
-    } catch (e) {
-      console.log(e)
-      throw (e)
-    }
+    const updatedUser = await this.userService.update(requester, { ...userToBeUpdated, id });
+    return updatedUser;
 
   }
 

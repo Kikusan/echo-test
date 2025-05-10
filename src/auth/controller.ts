@@ -1,8 +1,6 @@
-import { Controller, Post, Body, UnauthorizedException, UseGuards, Get, Request } from '@nestjs/common';
+import { Controller, Post, Body, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './service';
-import { JwtAuthGuard } from '../guard/jwt-auth.guard';
-import { Request as ExpressRequest } from 'express';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { LoginDto } from './dto/login.dto';
 
 @Controller('auth')
@@ -18,12 +16,4 @@ export class AuthController {
         }
         return this.authService.login(user);
     }
-
-    @UseGuards(JwtAuthGuard)
-    @ApiBearerAuth('jwt')
-    @Get('profile')
-    getProfile(@Request() req: ExpressRequest) {
-        return req.user;
-    }
-
 }
