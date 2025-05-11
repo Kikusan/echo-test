@@ -1,6 +1,6 @@
 import { IUserRepository } from '../repositories/IUserRepository';
 import { BadRequestError, ForbiddenError, NotFoundError, UnauthorizedError } from '../../tools/errors';
-import { UserToBeRegistered, UserToBeUpdated, Search, Requester, ReadUser, UserWithPass } from './types';
+import { UserToBeRegistered, UserToBeUpdated, Search, Requester, ReadUser, UserWithPass, UserWithRefreshTokens } from './types';
 import { UserEntity } from './User.entity';
 import { Page } from './types/Search.type';
 
@@ -31,6 +31,22 @@ export class UserService {
     return user;
   }
 
+  async logout(userId: string): Promise<void> {
+    return this.userRepository.logout(userId)
+  }
+
+  async getById(id: string): Promise<UserWithRefreshTokens> {
+    const user = await this.userRepository.getById(id)
+    if (!user) {
+      throw new NotFoundError('user not found')
+    }
+    return user;
+  }
+
+  async updateRefreshToken(userId: string, hashedToken: string): Promise<void> {
+    return this.userRepository.refreshToken(userId, hashedToken);
+  }
+
   async register(user: UserToBeRegistered) {
     const userWithSameNickname = await this.userRepository.getByNickname(user.nickname)
     if (userWithSameNickname) {
@@ -46,9 +62,9 @@ export class UserService {
       throw new UnauthorizedError(`unknown requester`);
     }
     this.isAllowedToUpdate(requesterWithRole, user);
-    const userTobeUpdated = await this.userRepository.getById(user.id)
+    const userInDB = await this.userRepository.getById(user.id)
 
-    if (!userTobeUpdated) {
+    if (!userInDB) {
       throw new NotFoundError('user not found')
     }
     const userWithSameNickname = await this.userRepository.getByNickname(user.nickname)
@@ -72,14 +88,14 @@ export class UserService {
     await this.userRepository.delete(id)
   }
 
-  private isAllowedToUpdate(requesterWithRole: ReadUser, user: UserToBeUpdated) {
+  private isAllowedToUpdate(requesterWithRole: UserWithRefreshTokens, user: UserToBeUpdated) {
     if (requesterWithRole.id === user.id) {
       return;
     }
     this.isAdmin(requesterWithRole);
   }
 
-  private isAdmin(requesterWithRole: ReadUser) {
+  private isAdmin(requesterWithRole: UserWithRefreshTokens) {
     if (requesterWithRole.role !== 'admin') {
       throw new ForbiddenError(`Requester ${requesterWithRole.nickname} is not authorized to perform this action`);
     }

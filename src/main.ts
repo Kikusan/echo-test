@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { ErrorInterceptor } from './interceptors/error.interceptor';
@@ -40,6 +41,7 @@ async function bootstrap() {
     forbidNonWhitelisted: true,
   }));
   app.useGlobalInterceptors(new ErrorInterceptor());
+  app.use(cookieParser());
 
   await app.listen(4000);
 }

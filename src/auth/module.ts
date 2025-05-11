@@ -14,7 +14,7 @@ import { User } from '../users/repositories/typeORM/entities/user.entity';
         PassportModule,
         JwtModule.register({
             secret: process.env.SECRET_KEY ?? 'secret_temp_key',
-            signOptions: { expiresIn: process.env.JWT_EXPIRATION ?? '1h' },
+            signOptions: { expiresIn: process.env.JWT_EXPIRATION ?? '15m' },
         }),
     ],
     providers: [AuthService, JwtStrategy,

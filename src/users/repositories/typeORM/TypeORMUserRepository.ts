@@ -1,7 +1,7 @@
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { IUserRepository } from '../IUserRepository';
-import { Page, ReadUser, Search, UserToBeRegistered, UserToBeUpdated, UserWithPass } from '../../services/types'
+import { Page, ReadUser, Search, UserToBeRegistered, UserToBeUpdated, UserWithPass, UserWithRefreshTokens } from '../../services/types'
 
 export class TypeOrmUserRepository implements IUserRepository {
   constructor(
@@ -26,41 +26,54 @@ export class TypeOrmUserRepository implements IUserRepository {
 
     const result = await qb.getManyAndCount();
     const pageResult: Page = {
-      users: result[0].map(user => this.mapTypeORMToUserDomain(user)),
+      users: result[0].map(user => this.mapTypeORMToUser(user)),
       totalPages: Math.ceil(result[1] / pageSize),
       totalResult: result[1]
     }
     return pageResult;
   }
 
-  async getById(id: string): Promise<UserWithPass | null> {
+  async getById(id: string): Promise<UserWithRefreshTokens | null> {
     const user = await this.userRepository.findOne({ where: { id } });
-    return user ? this.mapTypeORMToUserWithPassDomain(user) : null
+    return user ? this.mapTypeORMToUserWithRefreshToken(user) : null
   }
 
   async getByNickname(nickname: string): Promise<UserWithPass | null> {
     const user = await this.userRepository.findOne({ where: { nickname } })
-    return user ? this.mapTypeORMToUserWithPassDomain(user) : null
+    return user ? this.mapTypeORMToUserWithPass(user) : null
   }
   async register(user: UserToBeRegistered): Promise<ReadUser> {
     const registeredUser = await this.userRepository.save(user);
-    return this.mapTypeORMToUserDomain(registeredUser)
+    return this.mapTypeORMToUser(registeredUser)
   }
   async update(user: UserToBeUpdated): Promise<ReadUser> {
     const updatedUser = await this.userRepository.save({ ...user, updatedAt: new Date() });
-    return this.mapTypeORMToUserDomain(updatedUser)
+    return this.mapTypeORMToUser(updatedUser)
   }
   async delete(id: string): Promise<void> {
     await this.userRepository.delete(id)
   }
 
-  private mapTypeORMToUserDomain(user: User): ReadUser {
+  async refreshToken(userId: string, hashedToken: string): Promise<void> {
+    await this.userRepository.update(userId, { refreshToken: hashedToken });
+  }
+
+  async logout(userId: string): Promise<void> {
+    await this.userRepository.update(userId, { refreshToken: null });
+  }
+
+  private mapTypeORMToUser(user: User): ReadUser {
     const { id, nickname, name, address, comment, role } = user;
     return { id, nickname, address, name, comment, role: role.name }
   }
 
-  private mapTypeORMToUserWithPassDomain(user: User): UserWithPass {
+  private mapTypeORMToUserWithPass(user: User): UserWithPass {
     const { id, nickname, password, role } = user;
     return { id, nickname, password, role: role.name }
+  }
+
+  private mapTypeORMToUserWithRefreshToken(user: User): UserWithRefreshTokens {
+    const { id, nickname, refreshToken, role } = user;
+    return { id, nickname, refreshToken, role: role.name }
   }
 }

@@ -13,7 +13,8 @@ services:
       - DATABASE_NAME=postgres
       - MIGRATION_PATH=src/migrations/**/*{.ts,.js}
       - SECRET_KEY=thesecretkey
-      - JWT_EXPIRATION=1h
+      - JWT_EXPIRATION=15m
+      - JWT_REFRESH_EXPIRATION=7d
     depends_on:
       postgres:
         condition: service_healthy

@@ -19,6 +19,7 @@ describe('user controller', () => {
         register: mockRegister,
         update: mockUpdate,
         delete: mockDelete,
+        updateRefreshToken: jest.fn(),
 
     }
     let cryptedpassword = bcrypt.hashSync('testpassword', 10);
@@ -300,7 +301,7 @@ async function getToken(app: INestApplication<any>) {
         .post('/auth/login')
         .send({ nickname: 'testuser', password: 'testpassword' });
 
-    const token = login.body.access_token;
+    const token = login.body.accessToken;
     return token;
 }
 

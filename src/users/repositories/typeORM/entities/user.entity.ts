@@ -35,6 +35,9 @@ export class User {
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz', nullable: true })
   updatedAt: Date;
 
+  @Column({ name: 'refresh_token', type: 'text', nullable: true })
+  refreshToken: string | null;
+
   @ManyToOne(() => Role, { nullable: false, eager: true })
   @JoinColumn({ name: 'roleId' })
   role: Role;

@@ -22,6 +22,8 @@ describe('User service', () => {
             register: mockRegister,
             update: mockUpdate,
             delete: mockDelete,
+            refreshToken: jest.fn(),
+            logout: jest.fn(),
         }
         service = new UserService(userRepository);
     });

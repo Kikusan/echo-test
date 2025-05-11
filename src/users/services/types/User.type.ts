@@ -34,6 +34,13 @@ export type UserWithPass = {
     role: string
 }
 
+export type UserWithRefreshTokens = {
+    id: string,
+    refreshToken: string | null,
+    nickname: string,
+    role: string
+}
+
 export type Role = {
     id: string,
     name: string
