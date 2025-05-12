@@ -3,7 +3,6 @@
 ## Amélioration
 
 - [ ] Ajouter husky pour lancer les tests avant chaque commit
-- [ ] Faire des github actions pour lancer les tests à chaque fois que du code est poussé
 - [ ] Ajouter eslint pour harmoniser le code (pour le moment c'est le plugin vscode mais n'est pas propre au projet)
 - [ ] Mettre des raccourcis dans la conf de typescript afin d'eviter les routes à rallonge
 - [ ] Mettre des logs avec une classe de logs
