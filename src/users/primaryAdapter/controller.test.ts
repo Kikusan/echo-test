@@ -203,7 +203,7 @@ describe('user controller', () => {
             }
             authRepositoryMockGetByNickname.mockResolvedValueOnce(mockedUser)
             serviceMockGetByNickname.mockResolvedValueOnce(mockedUser)
-            const token = await getToken(app); ``
+            const token = await getToken(app);
 
             const expectedRequester = {
                 id: '4204e0cc-9153-4b93-bbdb-275bae7f4bd5',

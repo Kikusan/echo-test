@@ -37,4 +37,19 @@ Le but était dans un premier temps de permettre l'authentification et la récup
 Ce faisant, je me suis aperçu d'un leger problème: les rôles devrait avoir un attribut action qui serait un tableau de droit possible (tel que la lecture de la liste des utilisateurs, la suppression ou la modification meme si ce dernier tout le monde à le droit à partir du moment où un en identifié)
 
 cet étape me permet de supprimer le user mis aribitrairement à l'étape précédente.
-Pour des raisons pratiques, la route pour récupérer son token est dans le swagger. Dans la vraie vie, il ne sera pas présent
+Pour des raisons pratiques, la route pour récupérer son token est dans le swagger. Dans la vraie vie, il ne sera pas présent.
+
+## Quatrième temps
+
+Mise en place du refresh token via l'utilisation d'un cookie.
+En environnement de dev, je vais considérer que le mode http est toléré mais pas en production.
+Ce qui fait que le cookie sera en mode secure que lorsque l'environnement est PROD (à voir si ce n'est pas juste un flag is HTTPS).
+J'aurai pu utiliser https en local mais la plus value n'était pas vraiment bonne.
+
+Par contre ça m'a poussé à refactorer le code car il y avait une dépendance forte entre le service user et le service auth alors que seul la source était commune.
+
+Ce faisant, je me suis aperçu que je n'avais pas fait de stratégie de log. Ceci dit dans le cadre de l'exercice ça reste ok.
+Mais si je devais le faire, toutes mes classes auraient dans le constructeur une classe Logger qui implémenterait une interface ILogger.
+
+Par ailleurs, la déconnexion est incomplète, car à aucun moment je blackliste l'access token.
+Si je voulais faire une déconnexion propre, j'utiliserai un redis avec un durée de 15 min (durée de l'access token) dans lequel je stockerai les tokens à blacklister.

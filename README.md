@@ -58,6 +58,10 @@ Vous pouvez supprimer le dossier par la suite.
 
 Vous pouvez voir l'évolution de ma réfléxion [ici](diary.md)
 
+## Stratégie et réflexion sur les tests
+
+Vous pouvez voir ma réfléxion sur les tests [ici](Test-todo.md)
+
 ## TODO
 
 Les choses que je pourrais faire pour améliorer la code base[ici](TODO.md)
