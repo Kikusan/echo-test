@@ -5,6 +5,7 @@ import { UserService } from '../services/service';
 import { UserController } from './controller';
 import { FakeAuthModule } from '../../auth/fakeModule';
 import * as bcrypt from 'bcryptjs';
+import { ErrorInterceptor } from '../../interceptors/error.interceptor';
 
 describe('user controller', () => {
     let app: INestApplication;
@@ -48,7 +49,7 @@ describe('user controller', () => {
         }).compile();
         app = moduleFixture.createNestApplication();
         app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }));
-
+        app.useGlobalInterceptors(new ErrorInterceptor());
         await app.init();
     });
     afterAll(async () => {
