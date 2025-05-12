@@ -1,17 +1,18 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
-import { UserService } from '../users/services/service';
+import { IAuthRepository } from '../repositories/IAuthRepository';
+import { UserToken } from './UserToken.type';
 
 @Injectable()
 export class AuthService {
     constructor(
-        private readonly userService: UserService,
+        @Inject('authRepository') private readonly authRepository: IAuthRepository,
         private readonly jwtService: JwtService
     ) { }
 
-    async validateUser(nickname: string, pass: string): Promise<UserToken | null> {
-        const user = await this.userService.getByNickname(nickname);
+    private async validateUser(nickname: string, pass: string): Promise<UserToken | null> {
+        const user = await this.authRepository.getByNickname(nickname);
         if (user && await bcrypt.compare(pass, user.password)) {
             const { password, ...result } = user;
             return result;
@@ -19,7 +20,11 @@ export class AuthService {
         return null;
     }
 
-    async login(user: UserToken) {
+    async login(nickname: string, pass: string) {
+        const user = await this.validateUser(nickname, pass);
+        if (!user) {
+            throw new UnauthorizedException();
+        }
         const payload = { role: user.role, nickname: user.nickname, sub: user.id };
         const accessToken = this.jwtService.sign(payload, {
             expiresIn: process.env.JWT_EXPIRATION ?? '15m',
@@ -28,9 +33,8 @@ export class AuthService {
         const refreshToken = this.jwtService.sign({ sub: user.id }, {
             expiresIn: process.env.REFRESH_TOKEN_DURATION ?? '7d',
         });
-
         const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
-        await this.userService.updateRefreshToken(user.id, hashedRefreshToken);
+        await this.authRepository.refreshToken(user.id, hashedRefreshToken);
 
         return {
             accessToken, refreshToken
@@ -49,7 +53,7 @@ export class AuthService {
             throw new UnauthorizedException('Refresh token invalid or expired');
         }
 
-        const user = await this.userService.getById(payload.sub);
+        const user = await this.authRepository.getById(payload.sub);
         if (!user?.refreshToken) {
             throw new UnauthorizedException('User not found or refresh token missing');
         }
@@ -61,7 +65,7 @@ export class AuthService {
         const tokenContent = { role: user.role, nickname: user.nickname, sub: user.id };
         const accessToken = this.jwtService.sign(
             tokenContent,
-            { expiresIn: '15m' },
+            { expiresIn: process.env.JWT_EXPIRATION ?? '15m' },
         );
 
         const newRefreshToken = this.jwtService.sign(
@@ -70,19 +74,14 @@ export class AuthService {
         );
 
         const hashed = await bcrypt.hash(newRefreshToken, 10);
-        await this.userService.updateRefreshToken(user.id, hashed);
+        await this.authRepository.refreshToken(user.id, hashed);
 
         return { accessToken, refreshToken: newRefreshToken };
     }
 
     logout(userId: string): Promise<void> {
-        return this.userService.logout(userId)
+        return this.authRepository.logout(userId)
     }
 
 }
 
-export type UserToken = {
-    id: string,
-    nickname: string,
-    role: string
-}

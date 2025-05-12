@@ -1,7 +1,7 @@
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { IUserRepository } from '../IUserRepository';
-import { Page, ReadUser, Search, UserToBeRegistered, UserToBeUpdated, UserWithPass, UserWithRefreshTokens } from '../../services/types'
+import { Page, ReadUser, Search, UserToBeRegistered, UserToBeUpdated, UserPresence, UserWithRefreshTokens } from '../../services/types'
 
 export class TypeOrmUserRepository implements IUserRepository {
   constructor(
@@ -38,9 +38,9 @@ export class TypeOrmUserRepository implements IUserRepository {
     return user ? this.mapTypeORMToUserWithRefreshToken(user) : null
   }
 
-  async getByNickname(nickname: string): Promise<UserWithPass | null> {
+  async getByNickname(nickname: string): Promise<UserPresence | null> {
     const user = await this.userRepository.findOne({ where: { nickname } })
-    return user ? this.mapTypeORMToUserWithPass(user) : null
+    return user ? { id: user?.id } : null;
   }
   async register(user: UserToBeRegistered): Promise<ReadUser> {
     const registeredUser = await this.userRepository.save(user);
@@ -65,11 +65,6 @@ export class TypeOrmUserRepository implements IUserRepository {
   private mapTypeORMToUser(user: User): ReadUser {
     const { id, nickname, name, address, comment, role } = user;
     return { id, nickname, address, name, comment, role: role.name }
-  }
-
-  private mapTypeORMToUserWithPass(user: User): UserWithPass {
-    const { id, nickname, password, role } = user;
-    return { id, nickname, password, role: role.name }
   }
 
   private mapTypeORMToUserWithRefreshToken(user: User): UserWithRefreshTokens {

@@ -2,12 +2,11 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { DataSource } from 'typeorm';
-import { AuthService } from './service';
+import { AuthService } from './services/service';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { AuthController } from './controller';
-import { UserService } from '../users/services/service';
-import { TypeOrmUserRepository } from '../users/repositories/typeORM/TypeORMUserRepository';
-import { User } from '../users/repositories/typeORM/entities/user.entity';
+import { AuthController } from './primaryAdapter/controller';
+import { TypeOrmAuthRepository } from './repositories/typeORM/TypeORMAuthRepository';
+import { User } from './repositories/typeORM/entities/user.entity';
 
 @Module({
     imports: [
@@ -19,25 +18,11 @@ import { User } from '../users/repositories/typeORM/entities/user.entity';
     ],
     providers: [AuthService, JwtStrategy,
         {
-            provide: UserService,
-            useFactory: (
-                userRepository,
-            ) => {
-
-                return new UserService(
-                    userRepository,
-                );
-            },
-            inject: [
-                'userRepository',
-            ],
-        },
-        {
-            provide: 'userRepository',
+            provide: 'authRepository',
             inject: [DataSource],
             useFactory: (dataSource: DataSource) => {
                 const ormRepo = dataSource.getRepository(User);
-                return new TypeOrmUserRepository(ormRepo);
+                return new TypeOrmAuthRepository(ormRepo);
             },
         },
 

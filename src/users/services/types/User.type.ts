@@ -27,11 +27,8 @@ export type ReadUser = {
     role: string
 }
 
-export type UserWithPass = {
+export type UserPresence = {
     id: string,
-    nickname: string,
-    password: string,
-    role: string
 }
 
 export type UserWithRefreshTokens = {

@@ -5,6 +5,7 @@ module.exports = {
     '!src/main.ts',
     '!src/migrations/**',
     '!**/*.spec.ts',
+    '!**/repositories/**',
   ],
   preset: 'ts-jest',
   testEnvironment: 'node',

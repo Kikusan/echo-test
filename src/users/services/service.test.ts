@@ -22,8 +22,6 @@ describe('User service', () => {
             register: mockRegister,
             update: mockUpdate,
             delete: mockDelete,
-            refreshToken: jest.fn(),
-            logout: jest.fn(),
         }
         service = new UserService(userRepository);
     });
@@ -491,30 +489,5 @@ describe('User service', () => {
             expect(true).toBeFalsy();
         });
 
-    });
-
-    describe('getByNickname', () => {
-        it('should call the getByNickname method', async () => {
-            mockGetByNickname.mockResolvedValueOnce({
-                id: '4204e0cc-9153-4b93-bbdb-11111111111',
-                role: 'admin',
-                nickname: 'john doe',
-            })
-            await service.getByNickname('john doe');
-            expect(mockGetByNickname).toHaveBeenCalledWith('john doe');
-        });
-
-        it('should throw a not found error the user does not exist', async () => {
-            mockGetByNickname.mockResolvedValue(null)
-
-            try {
-                await service.getByNickname('john doe');
-            } catch (e) {
-                expect(e).toEqual(new NotFoundError('user not found'));
-                return;
-            }
-            //you are not supposed to reach this line
-            expect(true).toBeFalsy();
-        });
     });
 });

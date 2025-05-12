@@ -1,9 +1,9 @@
 import { Controller, Post, Body, UnauthorizedException, Req, Res, UseGuards } from '@nestjs/common';
-import { AuthService } from './service';
+import { AuthService } from '../services/service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { LoginDto } from './dto/login.dto';
 import { Request, Response } from 'express';
-import { JwtAuthGuard } from '../guard/jwt-auth.guard';
+import { JwtAuthGuard } from '../../guard/jwt-auth.guard';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -12,12 +12,7 @@ export class AuthController {
 
     @Post('login')
     async login(@Body() body: LoginDto, @Res({ passthrough: true }) res: Response) {
-        const user = await this.authService.validateUser(body.nickname, body.password);
-        if (!user) {
-            throw new UnauthorizedException();
-        }
-
-        const { accessToken, refreshToken } = await this.authService.login(user);
+        const { accessToken, refreshToken } = await this.authService.login(body.nickname, body.password);
         res.cookie('refresh_token', refreshToken, {
             httpOnly: true,
             secure: false,

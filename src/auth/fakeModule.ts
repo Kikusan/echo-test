@@ -1,14 +1,14 @@
 import { DynamicModule, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { AuthService } from './service';
+import { AuthService } from './services/service';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { AuthController } from './controller';
-import { UserService } from '../users/services/service';
+import { AuthController } from './primaryAdapter/controller';
+import { IAuthRepository } from './repositories/IAuthRepository';
 
 @Module({})
 export class FakeAuthModule {
-    static forRoot(mock: Partial<UserService>): DynamicModule {
+    static forRoot(mock: Partial<IAuthRepository>): DynamicModule {
         return {
             module: FakeAuthModule,
             imports: [
@@ -22,7 +22,7 @@ export class FakeAuthModule {
                 AuthService,
                 JwtStrategy,
                 {
-                    provide: UserService,
+                    provide: 'authRepository',
                     useValue: mock,
                 },
             ],

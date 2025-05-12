@@ -1,6 +1,6 @@
 import { IUserRepository } from '../repositories/IUserRepository';
 import { BadRequestError, ForbiddenError, NotFoundError, UnauthorizedError } from '../../tools/errors';
-import { UserToBeRegistered, UserToBeUpdated, Search, Requester, ReadUser, UserWithPass, UserWithRefreshTokens } from './types';
+import { UserToBeRegistered, UserToBeUpdated, Search, Requester, UserWithRefreshTokens } from './types';
 import { UserEntity } from './User.entity';
 import { Page } from './types/Search.type';
 
@@ -21,30 +21,6 @@ export class UserService {
     }
     this.isAdmin(requesterWithRole);
     return this.userRepository.get(search);
-  }
-
-  async getByNickname(nickname: string): Promise<UserWithPass> {
-    const user = await this.userRepository.getByNickname(nickname)
-    if (!user) {
-      throw new NotFoundError('user not found')
-    }
-    return user;
-  }
-
-  async logout(userId: string): Promise<void> {
-    return this.userRepository.logout(userId)
-  }
-
-  async getById(id: string): Promise<UserWithRefreshTokens> {
-    const user = await this.userRepository.getById(id)
-    if (!user) {
-      throw new NotFoundError('user not found')
-    }
-    return user;
-  }
-
-  async updateRefreshToken(userId: string, hashedToken: string): Promise<void> {
-    return this.userRepository.refreshToken(userId, hashedToken);
   }
 
   async register(user: UserToBeRegistered) {

@@ -8,21 +8,31 @@ import * as bcrypt from 'bcryptjs';
 
 describe('user controller', () => {
     let app: INestApplication;
-    const mockGet = jest.fn();
-    const mockRegister = jest.fn();
-    const mockUpdate = jest.fn();
-    const mockDelete = jest.fn();
-    const mockGetByNickname = jest.fn();
+    const serviceMockGet = jest.fn();
+    const serviceMockRegister = jest.fn();
+    const serviceMockUpdate = jest.fn();
+    const serviceMockDelete = jest.fn();
+    const serviceMockGetByNickname = jest.fn();
     const serviceMock = {
-        get: mockGet,
-        getByNickname: mockGetByNickname,
-        register: mockRegister,
-        update: mockUpdate,
-        delete: mockDelete,
+        get: serviceMockGet,
+        getByNickname: serviceMockGetByNickname,
+        register: serviceMockRegister,
+        update: serviceMockUpdate,
+        delete: serviceMockDelete,
         updateRefreshToken: jest.fn(),
 
     }
     let cryptedpassword = bcrypt.hashSync('testpassword', 10);
+
+    const authRepositoryMockGetById = jest.fn();
+    const authRepositoryMockGetByNickname = jest.fn();
+    const authRepositoryMock = {
+        getById: authRepositoryMockGetById,
+        getByNickname: authRepositoryMockGetByNickname,
+        logout: jest.fn(),
+        refreshToken: jest.fn(),
+    }
+
 
     beforeEach(() => {
         jest.clearAllMocks();
@@ -30,7 +40,7 @@ describe('user controller', () => {
 
     beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
-            imports: [FakeAuthModule.forRoot(serviceMock)],
+            imports: [FakeAuthModule.forRoot(authRepositoryMock)],
             controllers: [UserController],
             providers: [
                 { provide: UserService, useValue: serviceMock },
@@ -52,12 +62,14 @@ describe('user controller', () => {
                 .expect(code);
         }
         it('should be ok if the user is admin', async () => {
-            mockGetByNickname.mockResolvedValueOnce({
+            const mockedUser = {
                 id: '4204e0cc-9153-4b93-bbdb-275bae7f4bd5',
                 role: 'admin',
                 nickname: 'testuser',
                 password: cryptedpassword,
-            })
+            }
+            authRepositoryMockGetByNickname.mockResolvedValueOnce(mockedUser)
+            serviceMockGetByNickname.mockResolvedValueOnce(mockedUser)
             const token = await getToken(app);
             await testGet(token, 200);
 
@@ -71,34 +83,40 @@ describe('user controller', () => {
                 page: 1,
                 pageSize: 10,
             }
-            expect(mockGet).toHaveBeenCalledWith(expectedRequester, expectedSearchParams);
+            expect(serviceMockGet).toHaveBeenCalledWith(expectedRequester, expectedSearchParams);
         });
 
         it('should return a 403 if the user is not admin', async () => {
-            mockGetByNickname.mockResolvedValueOnce({
+            const mockedUser = {
                 id: '4204e0cc-9153-4b93-bbdb-275bae7f4bd5',
                 role: 'user',
                 nickname: 'testuser',
                 password: cryptedpassword,
-            })
+            }
+            authRepositoryMockGetByNickname.mockResolvedValueOnce(mockedUser)
+            serviceMockGetByNickname.mockResolvedValueOnce(mockedUser)
+
             const token = await getToken(app);
             await testGet(token, 403);
-            expect(mockGet).not.toHaveBeenCalled();
+            expect(serviceMockGet).not.toHaveBeenCalled();
         });
 
         it('should return a 401 if the user is not logged in', async () => {
             const token = await getToken(app);
             await testGet(token, 401);
-            expect(mockGet).not.toHaveBeenCalled();
+            expect(serviceMockGet).not.toHaveBeenCalled();
         });
 
         it('should return a 400 if the search params are wrong', async () => {
-            mockGetByNickname.mockResolvedValueOnce({
+            const mockedUser = {
                 id: '4204e0cc-9153-4b93-bbdb-275bae7f4bd5',
                 role: 'admin',
                 nickname: 'testuser',
                 password: cryptedpassword,
-            })
+            }
+            authRepositoryMockGetByNickname.mockResolvedValueOnce(mockedUser)
+            serviceMockGetByNickname.mockResolvedValueOnce(mockedUser)
+
             const token = await getToken(app);
             await request(app.getHttpServer())
                 .get('/users?pageSize=10&page=1&failure=true')
@@ -115,12 +133,14 @@ describe('user controller', () => {
                 .expect(code);
         }
         it('should be ok if the user is admin', async () => {
-            mockGetByNickname.mockResolvedValueOnce({
+            const mockedUser = {
                 id: '4204e0cc-9153-4b93-bbdb-275bae7f4bd5',
                 role: 'admin',
                 nickname: 'testuser',
                 password: cryptedpassword,
-            })
+            }
+            authRepositoryMockGetByNickname.mockResolvedValueOnce(mockedUser)
+            serviceMockGetByNickname.mockResolvedValueOnce(mockedUser)
             const token = await getToken(app);
 
             await testDelete(token, 204);
@@ -130,25 +150,27 @@ describe('user controller', () => {
                 nickname: 'testuser',
                 role: 'admin'
             };
-            expect(mockDelete).toHaveBeenCalledWith(expectedRequester, '4204e0cc-9153-4b93-bbdb-275bae7f4bd5');
+            expect(serviceMockDelete).toHaveBeenCalledWith(expectedRequester, '4204e0cc-9153-4b93-bbdb-275bae7f4bd5');
         });
 
         it('should return a 403 if the user is not admin', async () => {
-            mockGetByNickname.mockResolvedValueOnce({
+            const mockedUser = {
                 id: '4204e0cc-9153-4b93-bbdb-275bae7f4bd5',
                 role: 'user',
                 nickname: 'testuser',
                 password: cryptedpassword,
-            })
+            }
+            authRepositoryMockGetByNickname.mockResolvedValueOnce(mockedUser)
+            serviceMockGetByNickname.mockResolvedValueOnce(mockedUser)
             const token = await getToken(app);
             await testDelete(token, 403);
-            expect(mockDelete).not.toHaveBeenCalled();
+            expect(serviceMockDelete).not.toHaveBeenCalled();
         });
 
         it('should return a 401 if the user is not logged in', async () => {
             const token = await getToken(app);
             await testDelete(token, 401);
-            expect(mockDelete).not.toHaveBeenCalled();
+            expect(serviceMockDelete).not.toHaveBeenCalled();
         });
     });
 
@@ -173,29 +195,34 @@ describe('user controller', () => {
                 .expect(code);
         }
         it('should be ok if the user is admin', async () => {
-            mockGetByNickname.mockResolvedValueOnce({
+            const mockedUser = {
                 id: '4204e0cc-9153-4b93-bbdb-275bae7f4bd5',
                 role: 'admin',
                 nickname: 'testuser',
                 password: cryptedpassword,
-            })
-            const token = await getToken(app);
+            }
+            authRepositoryMockGetByNickname.mockResolvedValueOnce(mockedUser)
+            serviceMockGetByNickname.mockResolvedValueOnce(mockedUser)
+            const token = await getToken(app); ``
+
             const expectedRequester = {
                 id: '4204e0cc-9153-4b93-bbdb-275bae7f4bd5',
                 nickname: 'testuser',
                 role: 'admin'
             };
             await testUpdate(token, 200, payload);
-            expect(mockUpdate).toHaveBeenCalledWith(expectedRequester, { ...payload, id: '4204e0cc-9153-4b93-bbdb-275bae7f4bd5' });
+            expect(serviceMockUpdate).toHaveBeenCalledWith(expectedRequester, { ...payload, id: '4204e0cc-9153-4b93-bbdb-275bae7f4bd5' });
         });
 
         it('should be ok if the user is not admin', async () => {
-            mockGetByNickname.mockResolvedValueOnce({
+            const mockedUser = {
                 id: '4204e0cc-9153-4b93-bbdb-275bae7f4bd5',
                 role: 'user',
                 nickname: 'testuser',
                 password: cryptedpassword,
-            })
+            }
+            authRepositoryMockGetByNickname.mockResolvedValueOnce(mockedUser)
+            serviceMockGetByNickname.mockResolvedValueOnce(mockedUser)
             const token = await getToken(app);
             const expectedRequester = {
                 id: '4204e0cc-9153-4b93-bbdb-275bae7f4bd5',
@@ -204,16 +231,18 @@ describe('user controller', () => {
             };
 
             await testUpdate(token, 200, payload);
-            expect(mockUpdate).toHaveBeenCalledWith(expectedRequester, { ...payload, id: '4204e0cc-9153-4b93-bbdb-275bae7f4bd5' });
+            expect(serviceMockUpdate).toHaveBeenCalledWith(expectedRequester, { ...payload, id: '4204e0cc-9153-4b93-bbdb-275bae7f4bd5' });
         });
 
         it('should return a 400 if the payload is bad', async () => {
-            mockGetByNickname.mockResolvedValueOnce({
+            const mockedUser = {
                 id: '4204e0cc-9153-4b93-bbdb-275bae7f4bd5',
                 role: 'user',
                 nickname: 'testuser',
                 password: cryptedpassword,
-            })
+            }
+            authRepositoryMockGetByNickname.mockResolvedValueOnce(mockedUser)
+            serviceMockGetByNickname.mockResolvedValueOnce(mockedUser)
             const token = await getToken(app);
             const badPayload = {
                 "nickname": "popol",
@@ -227,13 +256,13 @@ describe('user controller', () => {
                 }
             }
             await testUpdate(token, 400, badPayload);
-            expect(mockUpdate).not.toHaveBeenCalled();
+            expect(serviceMockUpdate).not.toHaveBeenCalled();
         });
 
         it('should return a 401 if the user is not logged in', async () => {
             const token = await getToken(app);
             await testUpdate(token, 401, payload);
-            expect(mockUpdate).not.toHaveBeenCalled();
+            expect(serviceMockUpdate).not.toHaveBeenCalled();
         });
     });
 
@@ -258,7 +287,7 @@ describe('user controller', () => {
                 .expect(code);
         }
         it('should be ok', async () => {
-            mockGetByNickname.mockResolvedValueOnce({
+            serviceMockGetByNickname.mockResolvedValueOnce({
                 id: '4204e0cc-9153-4b93-bbdb-275bae7f4bd5',
                 role: 'admin',
                 nickname: 'testuser',
@@ -267,11 +296,11 @@ describe('user controller', () => {
             const token = await getToken(app);
 
             await testRegister(token, 201, payload);
-            expect(mockRegister).toHaveBeenCalledWith(payload);
+            expect(serviceMockRegister).toHaveBeenCalledWith(payload);
         });
 
         it('should return a 400 if the payload is bad', async () => {
-            mockGetByNickname.mockResolvedValueOnce({
+            serviceMockGetByNickname.mockResolvedValueOnce({
                 id: '4204e0cc-9153-4b93-bbdb-275bae7f4bd5',
                 role: 'user',
                 nickname: 'testuser',
@@ -290,7 +319,7 @@ describe('user controller', () => {
                 }
             }
             await testRegister(token, 400, badPayload);
-            expect(mockRegister).not.toHaveBeenCalled();
+            expect(serviceMockRegister).not.toHaveBeenCalled();
         });
     });
 
